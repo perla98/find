@@ -5,7 +5,20 @@
 
 typedef struct word {
 	char* name;
-	int total;
-	char* filename;
-	int** position;
-};
+	int *totalOccurrences;
+	struct fileOccurrences* fo;
+	struct word *next;
+} word;
+
+typedef struct fileOccurrences {
+	char* filePath;
+	int x;
+	int y;
+	struct fileOccurrences* next;
+} fileOccurrences;
+
+typedef struct Input {
+	char* path;
+	int rec;
+	struct Input* next;
+} Input;

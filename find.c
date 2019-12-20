@@ -128,7 +128,7 @@ void listFiles(char* filePath)
 	Input dir;
 
 	while(fgets(temp, 1024, f) != NULL) {
-		strtok(temp, "\n");
+		temp = strtok(temp, "\n");
 		char last = temp[strlen(temp) - 1];
 		if (last == 'r') {
 			dir.rec = 1;

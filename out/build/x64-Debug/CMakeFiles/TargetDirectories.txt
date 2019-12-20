@@ -1,3 +1,0 @@
-Z:/Documents/codiceSorgente/find/find/out/build/x64-Debug/CMakeFiles/find.dir
-Z:/Documents/codiceSorgente/find/find/out/build/x64-Debug/CMakeFiles/edit_cache.dir
-Z:/Documents/codiceSorgente/find/find/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir

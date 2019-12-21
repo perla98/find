@@ -4,8 +4,8 @@
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <string.h> 
-#include "dirent.h"
 #include "find.h"
+#include "dirent.h"
 
 #ifdef WIN32
 	char* pathFormat = "%s\\%s";
@@ -57,11 +57,6 @@ void writeToFile(char* filename, char* string)
 	FILE* f = fopen(filename, "a");
 	fprintf(f, "%s", string);
 	fclose(f);
-}
-
-int CompareWord(const word* p, const word* q)
-{
-	return strcmp(p->name, q->name);
 }
 
 int checkDir(dirent * d)
@@ -143,22 +138,36 @@ void listFiles(char* filePath)
 	fillRecursiveDirectory();
 }
 
+int CompareWord(const word* p, const word* q)
+{
+	return strcmp(p->name, q->name);
+}
+
 void addWordToList(struct word* w)
 {
 	if (wordList.name != NULL) {
 		struct word* temp = &wordList;
 		int pos = 0;
-		while (CompareWord(w, temp) || temp->next != NULL) {
+		while (temp != NULL && CompareWord(w, temp) > 0) {
 			temp = temp->next;
 			pos++;
 		}
+
+		temp = &wordList;
+		for (int i = 0; i < pos - 1; i++)
+			temp = temp->next;
+
+		temp->next = w;
+
 		struct word* x = &wordList;
-		for (int i = 0; i < pos; i++)
-			x = x->next;
+		if ((pos - 2) > 0) {
+			for (int i = 0; i < pos - 2; i++)
+				x = x->next;
 
-		w->next = temp;
-
-		x->next = w;
+			x->next = w;
+		}
+		else
+			x = w;
 	}
 	else {
 		w->next = NULL;
@@ -234,6 +243,17 @@ int main(int argc, char** argv)
 	//da rifare
 
 	//listFiles("prova.txt");
+
+	word a;
+	a.name = "ciao";
+	word b;
+	b.name = "xy";
+	word c;
+	c.name = "al";
+
+	addWordToList(&a);
+	addWordToList(&b);
+	addWordToList(&c);
 	
 	return 0;
 }

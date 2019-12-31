@@ -143,7 +143,7 @@ int CompareWord(const word* p, const word* q)
 	return strcmp(p->name, q->name);
 }
 
-void addWordToList(struct word* w)
+void addWordToList(struct word * w)
 {
 	if (wordList.name != NULL) {
 		struct word* temp = &wordList;
@@ -154,20 +154,18 @@ void addWordToList(struct word* w)
 		}
 
 		temp = &wordList;
+		
 		for (int i = 0; i < pos - 1; i++)
 			temp = temp->next;
-
-		temp->next = w;
-
-		struct word* x = &wordList;
-		if ((pos - 2) > 0) {
-			for (int i = 0; i < pos - 2; i++)
-				x = x->next;
-
-			x->next = w;
+			
+		if (CompareWord(w, temp) < 0) {
+			struct word cw = *temp;
+			w->next = &cw;
+			struct word x = *w;
+			wordList = x;
 		}
 		else
-			x = w;
+			temp -> next = w;
 	}
 	else {
 		w->next = NULL;
@@ -244,7 +242,7 @@ int main(int argc, char** argv)
 
 	//listFiles("prova.txt");
 
-	word a;
+	/*word a;
 	a.name = "ciao";
 	word b;
 	b.name = "xy";
@@ -253,7 +251,7 @@ int main(int argc, char** argv)
 
 	addWordToList(&a);
 	addWordToList(&b);
-	addWordToList(&c);
+	addWordToList(&c);*/
 	
 	return 0;
 }

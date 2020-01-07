@@ -2,8 +2,6 @@
 // o file di inclusione specifici del progetto.
 
 
-#pragma once
-
 typedef struct word {
 	char* name;
 	int *totalOccurrences;

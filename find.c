@@ -173,16 +173,20 @@ void addWordToList(struct word * w)
 	}
 }
 
-size_t countWord(char* s, char* word, int** position) {
+void insertPos(size_t* x, size_t* j, struct fileOccurrences* fo)
+{
+	fo->x = *x;
+	fo->y = *j;
+}
+
+fileOccurrences countWord(char* s, char* word, struct fileOccurrences* fo) {
 	char first = word[0];
-	size_t i, j, count = 0;
+	size_t i, j/*, count*/ = 0;
 	int buffer_size = sizeof(s);
 
-	position = (int**)malloc(buffer_size * sizeof(int*));
-	for (int i = 0; i < buffer_size; i++) position[i] = (int*)malloc(2 * sizeof(int));
-
 	if (first == '\0')
-		return strlen(s) + 1; 
+		//return strlen(s) + 1; 
+		return;
 
 	for (i = 0; s[i] != '\0'; i++) 
 		if (s[i] == first) {
@@ -190,13 +194,29 @@ size_t countWord(char* s, char* word, int** position) {
 				continue;
 			if (word[j] == '\0')
 			{
-				count++;
-				position[count -1][0] = i; //add
-				position[count -1][1] = j; //add
+				if (fo->x == NULL) {
+					insertPos(i, j, fo);
+				}
+				else
+				{
+					struct fileOccurrences *temp = fo;
+					struct Input* in = temp->filePath;
+					while (temp->next != NULL) {
+						temp = temp->next;
+					}
+					insertPos(i, j, temp);
+					temp->filePath = in;
+				}
 			}
 		}
 
-	return count;
+	return *fo;
+}
+
+void find(char* wordFilePath,char* inputFilePath,char* outputFilePath)
+{
+	listFiles(inputFilePath);
+
 }
 
 int CheckInput(char* argv, char* charArg)

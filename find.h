@@ -10,7 +10,7 @@ typedef struct word {
 } word;
 
 typedef struct fileOccurrences {
-	char* filePath;
+	struct Input* filePath;
 	int x;
 	int y;
 	struct fileOccurrences* next;

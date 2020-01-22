@@ -4,7 +4,6 @@
 
 typedef struct word {
 	char* name;
-	int *totalOccurrences;
 	struct fileOccurrences* fo;
 	struct word *next;
 } word;

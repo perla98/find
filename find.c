@@ -59,6 +59,68 @@ void writeToFile(char* filename, char* string)
 	fclose(f);
 }
 
+int countOccurrences(struct fileOccurrences* fo)
+{
+	int tot = 0;
+	while (fo != NULL)
+	{
+		tot++;
+		fo = fo->next;
+	} 
+
+	return tot;
+}
+
+void writeWords()
+{
+	char* DEFAULT_SEPARATOR = "\n";
+	struct word * f = &wordList;
+	while (f != NULL) {
+		char* name = malloc(sizeof(char) * (sizeof(f->name) + sizeof(DEFAULT_SEPARATOR)));
+		name = f->name;
+		struct fileOccurrences* fo = f->fo;
+		
+		int tot = countOccurrences(fo);
+
+		char* totOcc = (char*)malloc(sizeof(int) + sizeof(DEFAULT_SEPARATOR));
+		sprintf(totOcc, "%d", tot);
+
+		char* Occ = (char*)malloc((1024 + sizeof(DEFAULT_SEPARATOR) + sizeof(int) + sizeof(" ") + sizeof(int) + sizeof(DEFAULT_SEPARATOR)) * tot);
+
+		 fo = f->fo;
+		 char* str = (char*)malloc(sizeof(int));
+		 Occ[0] = 0;
+		while (fo != NULL)
+		{
+			//char* currentOcc = fo->filePath;
+			strcat(Occ, fo->filePath->path);
+			strcat(Occ, DEFAULT_SEPARATOR);
+			sprintf(str, "%d", fo->x);
+			strcat(Occ, str);
+			strcat(Occ, " ");
+			sprintf(str, "%d", fo->y);
+			strcat(Occ, str);
+			strcat(Occ, DEFAULT_SEPARATOR);
+
+			fo = fo->next;
+		}
+
+		char* myTxt = (char*)malloc(sizeof(name) + sizeof(totOcc) + sizeof(Occ));
+
+		myTxt[0] = 0;
+		strcat(myTxt, name);
+		strcat(myTxt, DEFAULT_SEPARATOR);
+		strcat(myTxt, totOcc);
+		strcat(myTxt, DEFAULT_SEPARATOR);
+		strcat(myTxt, Occ);
+		strcat(myTxt, DEFAULT_SEPARATOR);
+
+
+		writeToFile("find.txt", myTxt);
+		f = f->next;
+	}
+}
+
 int checkDir(dirent * d)
 {
 	return d->d_type == DT_DIR;
@@ -261,17 +323,40 @@ int main(int argc, char** argv)
 	//da rifare
 
 	//listFiles("prova.txt");
-
-	/*word a;
+	struct fileOccurrences fo1;
+	struct fileOccurrences fo2;
+	struct fileOccurrences fo3;
+	word a;
 	a.name = "ciao";
+
+	Input n;
+	n.path = "dfsdfsd";
+	n.next = NULL;
+	fo1.filePath = &n;
+	fo1.x = 10;
+	fo1.y = 15;
+	fo1.next = NULL;
+	a.fo = &fo1;
 	word b;
 	b.name = "xy";
+	fo2.filePath = &n;
+	fo2.x = 32;
+	fo2.y = 15;
+	fo2.next = NULL;
+	b.fo = &fo2;
 	word c;
 	c.name = "al";
+	fo3.filePath = &n;
+	fo3.x = 32;
+	fo3.y = 45;
+	fo3.next = NULL;
+	c.fo = &fo3;
 
 	addWordToList(&a);
 	addWordToList(&b);
-	addWordToList(&c);*/
+	addWordToList(&c);
 	
+	writeWords();
+
 	return 0;
 }

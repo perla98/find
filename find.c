@@ -292,13 +292,13 @@ int main(int argc, char** argv)
 {
 	struct option long_options[] = {
 	{"word", required_argument, 0, 'w'},
-	{"path", required_argument, 0, 'p'},
+	{"input", required_argument, 0, 'i'},
+	{"output", required_argument, 0, 'o'},
     {"exclude", required_argument, 0, 'e'},
-    {"history", required_argument, 0, 'h'},
-    {"user", required_argument, 0, 'u'},
-    {"group", required_argument, 0, 'g'},
-    {"length", required_argument, 0, 'l'},
-    {"noscan", no_argument, 0, 'n'},
+    {"verbose", required_argument, 0, 'v'},
+    {"report", required_argument, 0, 'r'},
+    {"show", required_argument, 0, 's'},
+    {"file", required_argument, 0, 'f'},
     {"help", no_argument, 0, 'x'},
 	{NULL, 0, NULL, 0}
 
@@ -309,7 +309,7 @@ int main(int argc, char** argv)
     char* extension = NULL;
     int opt;
     int option_index = 0;
-    const char * short_options = "w:p:e:h:u:g:l:";
+    const char * short_options = "w:i:o:e:v:r:s:f:x";
 
 	while ((opt = getopt_long(argc, argv, short_options , long_options, &option_index)) != -1) {
         switch (opt) {

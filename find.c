@@ -288,37 +288,43 @@ int CheckInput(char* argv, char* charArg)
 
 int main(int argc, char** argv)
 {
-	char charArg = '-';
+	struct option long_options[] = {
+	{"word", required_argument, 0, 'w'},
+	{"path", required_argument, 0, 'p'},
+    {"exclude", required_argument, 0, 'e'},
+    {"history", required_argument, 0, 'h'},
+    {"user", required_argument, 0, 'u'},
+    {"group", required_argument, 0, 'g'},
+    {"length", required_argument, 0, 'l'},
+    {"noscan", no_argument, 0, 'n'},
+    {"help", no_argument, 0, 'x'},
+	{NULL, 0, NULL, 0}
 
-	char* wordFilePath;
-	char* inputFilePath;
-	char* outputFilePath;
+	};
 
-	while (*++argv)
-		if ((*argv)[0] == charArg)
-			switch ((*argv)[1]) 
-			{
-			default:
-				printf("Unknown option -%c\n\n", (*argv)[1]);
-				break;
-			case 'w':
-				if (CheckInput(argv, charArg))
-					wordFilePath = argv[1];
-				break;
-			case 'i':
-				if (CheckInput(argv, charArg))
-					inputFilePath = argv[1];
-				break;
-			case 'o':
-				if (CheckInput(argv, charArg))
-					outputFilePath = argv[1];
-				break;
-			case 'e':
-				break;
-			case 'r':
-				break;
-				
-			}
+	char* word;
+    char* path;
+    char* extension = NULL;
+    int opt;
+    int option_index = 0;
+    const char * short_options = "w:p:e:h:u:g:l:";
+
+	while ((opt = getopt_long(argc, argv, short_options , long_options, &option_index)) != -1) {
+        switch (opt) {
+            case 'w': word = optarg; 
+                break;
+            case 'p': path = optarg; 
+                break;
+            case 'e':extension = optarg;
+                break;
+            case 'h':printf("Hai scelto H\n");
+                break;
+            case 'u':printf("Hai scelto U\n");
+                break;
+            case 'a': printf("Hai scelto G\n"); 
+                break;
+        }
+    }
 
 	//da rifare
 

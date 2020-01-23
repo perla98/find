@@ -4,8 +4,10 @@
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <string.h> 
+#include <dirent.h>
+#include <getopt.h>
 #include "find.h"
-#include "dirent.h"
+
 
 #ifdef WIN32
 	char* pathFormat = "%s\\%s";
@@ -121,7 +123,7 @@ void writeWords()
 	}
 }
 
-int checkDir(dirent * d)
+int checkDir(struct dirent * d)
 {
 	return d->d_type == DT_DIR;
 }
@@ -154,7 +156,7 @@ void fillRecursiveDirectory()
 		if (temp.rec == 1)
 		{
 			DIR* d = opendir(temp.path);
-			dirent* entry;
+			struct dirent* entry;
 			while ((entry = readdir(d)) != NULL) {
 				if (checkDir(entry)) {
 					char path[1024];
@@ -332,7 +334,7 @@ int main(int argc, char** argv)
 	struct fileOccurrences fo1;
 	struct fileOccurrences fo2;
 	struct fileOccurrences fo3;
-	word a;
+	struct word a;
 	a.name = "ciao";
 
 	Input n;
@@ -343,14 +345,14 @@ int main(int argc, char** argv)
 	fo1.y = 15;
 	fo1.next = NULL;
 	a.fo = &fo1;
-	word b;
+	struct word b;
 	b.name = "xy";
 	fo2.filePath = &n;
 	fo2.x = 32;
 	fo2.y = 15;
 	fo2.next = NULL;
 	b.fo = &fo2;
-	word c;
+	struct word c;
 	c.name = "al";
 	fo3.filePath = &n;
 	fo3.x = 32;

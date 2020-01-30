@@ -15,6 +15,8 @@
 	char* pathFormat = "%s/%s";
 #endif
 
+int verboseMode = 0;
+
 Input inputList;
 
 word wordList;
@@ -73,7 +75,7 @@ int countOccurrences(struct fileOccurrences* fo)
 	return tot;
 }
 
-void writeWords()
+void writeWords(char* path)
 {
 	char* DEFAULT_SEPARATOR = "\n";
 	struct word * f = &wordList;
@@ -118,7 +120,7 @@ void writeWords()
 		strcat(myTxt, DEFAULT_SEPARATOR);
 
 
-		writeToFile("find.txt", myTxt);
+		writeToFile(path, myTxt);
 		f = f->next;
 	}
 }
@@ -248,9 +250,9 @@ fileOccurrences countWord(char* s, char* word, struct fileOccurrences* fo) {
 	size_t i, j/*, count*/ = 0;
 	int buffer_size = sizeof(s);
 
-	if (first == '\0')
+	/* if (first == '\0')
 		//return strlen(s) + 1; 
-		return;
+		return; */
 
 	for (i = 0; s[i] != '\0'; i++) 
 		if (s[i] == first) {
@@ -277,19 +279,41 @@ fileOccurrences countWord(char* s, char* word, struct fileOccurrences* fo) {
 	return *fo;
 }
 
-void find(char* wordFilePath,char* inputFilePath,char* outputFilePath)
+void find(char* wordFilePath,char* inputFilePath,char* outputFilePath, char* extention)
 {
 	listFiles(inputFilePath);
+	struct Input * input = &inputList;
+	while (input->next != NULL) {
+		//input->path;
+		char* read = readFile(input->path); 
+		char* words = malloc(sizeof(readFile(wordFilePath))); 
+		FILE* f = fopen(inputFilePath, "r");
+		struct fileOccurrences* foc;
+		struct word w;
+		while(fgets(words, sizeof(words), f))
+		{
+			countWord(read, words, foc);
+			w.fo = foc;
+			w.name = words;
+			addWordToList(&w);
+		}
+		
+		input = input->next;
+	}
 
+	if(outputFilePath != 0)
+		writeWords(outputFilePath);
+	
 }
 
-int CheckInput(char* argv, char* charArg)
-{
-	return (argv)[3] != &charArg;
+void report(char* output, char* show, char* showfile){
+
 }
 
 int main(int argc, char** argv)
 {
+	printf("avvio");
+	
 	struct option long_options[] = {
 	{"word", required_argument, 0, 'w'},
 	{"input", required_argument, 0, 'i'},
@@ -299,72 +323,53 @@ int main(int argc, char** argv)
     {"report", required_argument, 0, 'r'},
     {"show", required_argument, 0, 's'},
     {"file", required_argument, 0, 'f'},
-    {"help", no_argument, 0, 'x'},
 	{NULL, 0, NULL, 0}
 
 	};
 
 	char* word;
     char* path;
-    char* extension = NULL;
+	char* output;
+    char* extension; //= NULL;
+	char* show;
+	char* showFile;
     int opt;
     int option_index = 0;
     const char * short_options = "w:i:o:e:v:r:s:f:x";
-
+	
 	while ((opt = getopt_long(argc, argv, short_options , long_options, &option_index)) != -1) {
         switch (opt) {
             case 'w': word = optarg; 
                 break;
-            case 'p': path = optarg; 
+            case 'i': path = optarg; 
                 break;
-            case 'e':extension = optarg;
+			case 'o': output = optarg;
+				break;
+			case 'e': extension = optarg;
                 break;
-            case 'h':printf("Hai scelto H\n");
+			case 'v': verboseMode = 1;
+                break;	
+            case 'r': output = optarg;
                 break;
-            case 'u':printf("Hai scelto U\n");
+            case 's': show = optarg;
                 break;
-            case 'a': printf("Hai scelto G\n"); 
+            case 'f': showFile = optarg; 
                 break;
         }
     }
-
-	//da rifare
-
-	//listFiles("prova.txt");
-	struct fileOccurrences fo1;
-	struct fileOccurrences fo2;
-	struct fileOccurrences fo3;
-	struct word a;
-	a.name = "ciao";
-
-	Input n;
-	n.path = "dfsdfsd";
-	n.next = NULL;
-	fo1.filePath = &n;
-	fo1.x = 10;
-	fo1.y = 15;
-	fo1.next = NULL;
-	a.fo = &fo1;
-	struct word b;
-	b.name = "xy";
-	fo2.filePath = &n;
-	fo2.x = 32;
-	fo2.y = 15;
-	fo2.next = NULL;
-	b.fo = &fo2;
-	struct word c;
-	c.name = "al";
-	fo3.filePath = &n;
-	fo3.x = 32;
-	fo3.y = 45;
-	fo3.next = NULL;
-	c.fo = &fo3;
-
-	addWordToList(&a);
-	addWordToList(&b);
-	addWordToList(&c);
 	
-	writeWords();
-
+	if(word !=NULL && word != 0 && path != 0 && path !=NULL){
+		/*printf(word);
+		printf(path);
+		printf(output);*/
+		find(word, path, output, extension);
+	}
+	if(show != 0 && showFile != 0){
+		/*printf(show);
+		printf(showFile);
+		printf(output);*/
+		report(output, show, showFile);
+	}
+	
 	return 0;
 }

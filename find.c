@@ -85,24 +85,24 @@ void writeWords(char* path)
 	const char* wd = "WORD ";
 	const char* to = "TOTAL "; 
 	const char* fl = "FILE ";
-	char* name;
+	/*char* name;
 	char* totOcc;
 	char* Occ ;
-	char* str ;
+	char* str ;*/
 	while (f != NULL) {
-		name = malloc(sizeof(char) * (sizeof(wd) + sizeof(f->name) + sizeof(DEFAULT_SEPARATOR)));
+		char* name = malloc(sizeof(char) * (sizeof(wd) + sizeof(f->name) + sizeof(DEFAULT_SEPARATOR)));
 		name = f->name;
 		struct fileOccurrences* fo = f->fo;
 		
 		int tot = countOccurrences(fo);
 		
-		totOcc = (char*)malloc(sizeof(to) + sizeof(int) + sizeof(DEFAULT_SEPARATOR));
+		char* totOcc = malloc(sizeof(char)*(sizeof(to) + sizeof(int) + sizeof(DEFAULT_SEPARATOR)));
 		sprintf(totOcc, "%d", tot);
 
-	    Occ = (char*)malloc((sizeof(fl) + 1024 + sizeof(DEFAULT_SEPARATOR) + sizeof(int) + sizeof(" ") + sizeof(int) + sizeof(DEFAULT_SEPARATOR)) * tot);
+	    char* Occ = (char*)malloc((sizeof(fl) + 1024 + sizeof(DEFAULT_SEPARATOR) + sizeof(int) + sizeof(" ") + sizeof(int) + sizeof(DEFAULT_SEPARATOR)) * tot);
 		
 		fo = f->fo;
-		str = (char*)malloc(sizeof(int));
+		char* str = (char*)malloc(sizeof(int));
 		Occ[0] = 0;
 		
 		while (fo->next != NULL)
@@ -157,24 +157,28 @@ int checkDir(struct dirent * d)
 	return d->d_type == DT_DIR;
 }
 
-void addFileOccurrences(struct fileOccurrences* fo, int x, int y)
+void addFileOccurrences(struct fileOccurrences fo, int x, int y)
 {
-	if (fo->x != 0 && fo->y != 0) {
+	struct fileOccurrences* temp = &fo;
 
-		struct fileOccurrences* temp = fo;
+	if (fo.x != 0 && fo.y != 0) {
+
+		struct fileOccurrences newFo;
 
 		while (temp->next != NULL)
 			temp = temp->next;
+		
+		newFo.x = x;
+		newFo.y = y;
+		newFo.filePath = fo.filePath;
+		newFo.next = NULL;
 
-		temp->x = x;
-		temp->y = y;
-		temp->filePath = fo->filePath;
-		temp->next = NULL;
+		temp->next = &newFo;
 	}
 	else {
-		fo->x = x;
-		fo->y = y;
-		fo->next = NULL;
+		fo.x = x;
+		fo.y = y;
+		fo.next = NULL;
 	}
 }	
 
@@ -293,23 +297,24 @@ void insertPos(int* x, int* j, struct fileOccurrences* fo)
 	fo->y = *j;
 }
 
-int countWord(char* s, char* word, struct fileOccurrences* fo) {
+int countWord(char* s, char* word, struct fileOccurrences fo) {
 	char first = word[0];
 	size_t i, j, count = 0;
-	int row = 1;
+	int row = 0;
 	if (first == '\0')
 		return strlen(s) + 1;
 
 	for (i = 0; s[i] != '\0'; i++) 
+		if(s[i] == '\n')
+		row++;
+
 		if (s[i] == first) {
 			for (j = 1; word[j] != '\0' && s[i + j] == word[j]; j++) 
 				continue;
 			if (word[j] == '\0') 
 			{
 				count++;
-				//printf("%d\n", row);
-				//printf("%d\n", i-j);
-				addFileOccurrences(fo, row, j);
+				addFileOccurrences(fo, row, i + j);
 			}
 		}
 
@@ -343,7 +348,9 @@ void find(char* wordFilePath,char* inputFilePath,char* outputFilePath, char* ext
 				printf("Inizio elaborazione parola: %s\n", words);
 			//elaborazione non funzionante
 			foc.filePath = input;
-			countWord(read, words, &foc);
+			foc.x = 0;
+			foc.y = 0;
+			countWord(read, words, foc);
 			w.fo = &foc;
 			w.name = words;
 			//printf("%d\n", w.fo->x);

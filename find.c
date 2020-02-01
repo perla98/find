@@ -17,6 +17,8 @@
 
 int verboseMode = 0;
 
+int outputMode = 0;
+
 Input inputList;
 
 word wordList;
@@ -56,9 +58,9 @@ char* readFile(char* filename)
 	return buffer;
 }
 
-void writeToFile(char* filename, char* string)
+void writeToFile(const char* filename, char* string)
 {
-	FILE* f = fopen(filename, "a");
+	FILE* f = fopen(filename, "w");
 	fprintf(f, "%s", string);
 	fclose(f);
 }
@@ -66,12 +68,13 @@ void writeToFile(char* filename, char* string)
 int countOccurrences(struct fileOccurrences* fo)
 {
 	int tot = 0;
-	while (fo != NULL)
+	//struct fileOccurences *temp = &fo;
+	while (fo->next != NULL)
 	{
 		tot++;
 		fo = fo->next;
 	} 
-
+	
 	return tot;
 }
 
@@ -79,24 +82,33 @@ void writeWords(char* path)
 {
 	char* DEFAULT_SEPARATOR = "\n";
 	struct word * f = &wordList;
+	const char* wd = "WORD ";
+	const char* to = "TOTAL "; 
+	const char* fl = "FILE ";
+	char* name;
+	char* totOcc;
+	char* Occ ;
+	char* str ;
 	while (f != NULL) {
-		char* name = malloc(sizeof(char) * (sizeof(f->name) + sizeof(DEFAULT_SEPARATOR)));
+		name = malloc(sizeof(char) * (sizeof(wd) + sizeof(f->name) + sizeof(DEFAULT_SEPARATOR)));
 		name = f->name;
 		struct fileOccurrences* fo = f->fo;
 		
 		int tot = countOccurrences(fo);
-
-		char* totOcc = (char*)malloc(sizeof(int) + sizeof(DEFAULT_SEPARATOR));
+		
+		totOcc = (char*)malloc(sizeof(to) + sizeof(int) + sizeof(DEFAULT_SEPARATOR));
 		sprintf(totOcc, "%d", tot);
 
-		char* Occ = (char*)malloc((1024 + sizeof(DEFAULT_SEPARATOR) + sizeof(int) + sizeof(" ") + sizeof(int) + sizeof(DEFAULT_SEPARATOR)) * tot);
-
-		 fo = f->fo;
-		 char* str = (char*)malloc(sizeof(int));
-		 Occ[0] = 0;
-		while (fo != NULL)
+	    Occ = (char*)malloc((sizeof(fl) + 1024 + sizeof(DEFAULT_SEPARATOR) + sizeof(int) + sizeof(" ") + sizeof(int) + sizeof(DEFAULT_SEPARATOR)) * tot);
+		
+		fo = f->fo;
+		str = (char*)malloc(sizeof(int));
+		Occ[0] = 0;
+		
+		while (fo->next != NULL)
 		{
 			//char* currentOcc = fo->filePath;
+			strcat(Occ, fl);
 			strcat(Occ, fo->filePath->path);
 			strcat(Occ, DEFAULT_SEPARATOR);
 			sprintf(str, "%d", fo->x);
@@ -108,19 +120,34 @@ void writeWords(char* path)
 
 			fo = fo->next;
 		}
-
+		
 		char* myTxt = (char*)malloc(sizeof(name) + sizeof(totOcc) + sizeof(Occ));
 
 		myTxt[0] = 0;
+		strcat(myTxt, wd);
 		strcat(myTxt, name);
 		strcat(myTxt, DEFAULT_SEPARATOR);
+		strcat(myTxt, to);
 		strcat(myTxt, totOcc);
 		strcat(myTxt, DEFAULT_SEPARATOR);
 		strcat(myTxt, Occ);
 		strcat(myTxt, DEFAULT_SEPARATOR);
+		
 
+		if(outputMode)
+			writeToFile(path, myTxt);
+		else
+			printf("%s", myTxt);
+		
+		
+		free(name);
+		free(totOcc);
+		free(Occ);
+		free(str);
+		//free(myTxt);
+		
+		
 
-		writeToFile(path, myTxt);
 		f = f->next;
 	}
 }
@@ -129,6 +156,27 @@ int checkDir(struct dirent * d)
 {
 	return d->d_type == DT_DIR;
 }
+
+void addFileOccurrences(struct fileOccurrences* fo, int x, int y)
+{
+	if (fo->x != 0 && fo->y != 0) {
+
+		struct fileOccurrences* temp = fo;
+
+		while (temp->next != NULL)
+			temp = temp->next;
+
+		temp->x = x;
+		temp->y = y;
+		temp->filePath = fo->filePath;
+		temp->next = NULL;
+	}
+	else {
+		fo->x = x;
+		fo->y = y;
+		fo->next = NULL;
+	}
+}	
 
 void addInputToList(struct Input* dir)
 {
@@ -239,70 +287,85 @@ void addWordToList(struct word * w)
 	}
 }
 
-void insertPos(size_t* x, size_t* j, struct fileOccurrences* fo)
+void insertPos(int* x, int* j, struct fileOccurrences* fo)
 {
 	fo->x = *x;
 	fo->y = *j;
 }
 
-fileOccurrences countWord(char* s, char* word, struct fileOccurrences* fo) {
+int countWord(char* s, char* word, struct fileOccurrences* fo) {
 	char first = word[0];
-	size_t i, j/*, count*/ = 0;
-	int buffer_size = sizeof(s);
-
-	/* if (first == '\0')
-		//return strlen(s) + 1; 
-		return; */
+	size_t i, j, count = 0;
+	int row = 1;
+	if (first == '\0')
+		return strlen(s) + 1;
 
 	for (i = 0; s[i] != '\0'; i++) 
 		if (s[i] == first) {
-			for (j = 1; word[j] != '\0' && s[i + j] == word[j]; j++)
+			for (j = 1; word[j] != '\0' && s[i + j] == word[j]; j++) 
 				continue;
-			if (word[j] == '\0')
+			if (word[j] == '\0') 
 			{
-				if (fo->x == NULL) {
-					insertPos(i, j, fo);
-				}
-				else
-				{
-					struct fileOccurrences *temp = fo;
-					struct Input* in = temp->filePath;
-					while (temp->next != NULL) {
-						temp = temp->next;
-					}
-					insertPos(i, j, temp);
-					temp->filePath = in;
-				}
+				count++;
+				//printf("%d\n", row);
+				//printf("%d\n", i-j);
+				addFileOccurrences(fo, row, j);
 			}
 		}
 
-	return *fo;
+	return count;
 }
 
 void find(char* wordFilePath,char* inputFilePath,char* outputFilePath, char* extention)
 {
 	listFiles(inputFilePath);
 	struct Input * input = &inputList;
-	while (input->next != NULL) {
+	
+	char* words = malloc(sizeof(readFile(wordFilePath))); 
+	FILE* f = fopen(wordFilePath, "r");
+	int i= 0;
+	while (input != NULL) {
 		//input->path;
+		//printf("%d", ++i);
+
+		if(verboseMode)
+				printf("Inizio elaborazione file: %s\n", input->path);
 		char* read = readFile(input->path); 
-		char* words = malloc(sizeof(readFile(wordFilePath))); 
-		FILE* f = fopen(inputFilePath, "r");
-		struct fileOccurrences* foc;
-		struct word w;
+		
+		
 		while(fgets(words, sizeof(words), f))
 		{
-			countWord(read, words, foc);
-			w.fo = foc;
+
+			struct fileOccurrences foc;
+			struct word w;
+
+			if(verboseMode)
+				printf("Inizio elaborazione parola: %s\n", words);
+			//elaborazione non funzionante
+			foc.filePath = input;
+			countWord(read, words, &foc);
+			w.fo = &foc;
 			w.name = words;
+			//printf("%d\n", w.fo->x);
+			//printf("%d\n", w.fo->y);
 			addWordToList(&w);
+			//fine elaborazione
+			if(verboseMode)
+				printf("Fine elaborazione parola: %s\n", words);
 		}
+
+		if(verboseMode)
+				printf("Fine elaborazione file: %s\n", input->path);
 		
+		//printf("new input");
 		input = input->next;
+		
 	}
 
-	if(outputFilePath != 0)
-		writeWords(outputFilePath);
+	if(verboseMode)
+		printf("Tutte le elaborazioni sono terminate.\n");
+
+	writeWords(outputFilePath);
 	
 }
 
@@ -312,14 +375,14 @@ void report(char* output, char* show, char* showfile){
 
 int main(int argc, char** argv)
 {
-	printf("avvio");
+	//printf("avvio");
 	
 	struct option long_options[] = {
 	{"word", required_argument, 0, 'w'},
 	{"input", required_argument, 0, 'i'},
 	{"output", required_argument, 0, 'o'},
     {"exclude", required_argument, 0, 'e'},
-    {"verbose", required_argument, 0, 'v'},
+    {"verbose", no_argument, 0, 'v'},
     {"report", required_argument, 0, 'r'},
     {"show", required_argument, 0, 's'},
     {"file", required_argument, 0, 'f'},
@@ -330,7 +393,7 @@ int main(int argc, char** argv)
 	char* word;
     char* path;
 	char* output;
-    char* extension; //= NULL;
+    char* extension;
 	char* show;
 	char* showFile;
     int opt;
@@ -343,7 +406,8 @@ int main(int argc, char** argv)
                 break;
             case 'i': path = optarg; 
                 break;
-			case 'o': output = optarg;
+			case 'o': 	outputMode = 1;
+						output = optarg;
 				break;
 			case 'e': extension = optarg;
                 break;
@@ -364,12 +428,14 @@ int main(int argc, char** argv)
 		printf(output);*/
 		find(word, path, output, extension);
 	}
-	if(show != 0 && showFile != 0){
+	else if(show != 0 && showFile != 0){
 		/*printf(show);
 		printf(showFile);
 		printf(output);*/
 		report(output, show, showFile);
 	}
+	else 
+		printf("wrong args\n");
 	
 	return 0;
 }

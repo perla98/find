@@ -1,22 +1,28 @@
-﻿// find.h: file di inclusione per file di inclusione di sistema standard,
-// o file di inclusione specifici del progetto.
+﻿
+const int MAX_WORD = 200;
 
+const int MAX_OCC = 400;
 
-typedef struct word {
-	char* name;
-	struct fileOccurrences* fo;
-	struct word *next;
-} word;
 
 typedef struct fileOccurrences {
 	struct Input* filePath;
 	int x;
 	int y;
-	struct fileOccurrences* next;
 } fileOccurrences;
+
+
+typedef struct word {
+	char* name;
+	struct fileOccurrences* fo;
+} word;
 
 typedef struct Input {
 	char* path;
 	int rec;
 	struct Input* next;
 } Input;
+
+
+void find(char* wordFilePath,char* inputFilePath,char* outputFilePath, char* extention);
+
+void report(char* output, char* show, char* showfile);

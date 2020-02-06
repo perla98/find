@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/find",
-            "args": ["--word",  "parole.txt", "--input", "percorsi.txt", "--verbose"],
+            "args": ["--input", "percorsi.txt" , "--word", "parole.txt", "--verbose"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

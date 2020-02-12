@@ -50,10 +50,13 @@ void writeWords(struct word* listW, char* path)
 	printf(fl);
 	printf(oc);
 	printf(DEFAULT_SEPARATOR);
+
+
+	char* str = "ciao";
 	/*
 	char* name;
 	char* occ ;
-	char* str ;
+	
 	
 	for(int i=0; i<MAX_WORD; i++)
 	{
@@ -69,6 +72,12 @@ void writeWords(struct word* listW, char* path)
 
 		}
 	}*/
+
+	if(strlen(path) > 0)
+		writeToFile(path, str);
+	else
+		printf("%s\n", str);
+
 }
 
 void addInputToList(struct Input* dir)

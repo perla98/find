@@ -24,7 +24,7 @@ int main(int argc, char** argv)
     int verboseMode = 0;
 	char* word;
     char* path;
-	char* output;
+	char* output = "";
     char* extension = "...";
 	char* show;
 	char* showFile;

@@ -22,8 +22,8 @@ int countWord(char* s, char* word, int* X, int* Y) {
 			if (word[j] == '\0') 
 			{
 				count++;
-				X[count] = row;
-				Y[count] = i - f;
+				X[count-1] = row;
+				Y[count-1] = i - f;
 			}
 		}
 	}

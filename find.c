@@ -36,6 +36,18 @@ void writeToFile(const char* filename, char* string)
 	fclose(f);
 }
 
+int countWordOccurrences(struct word w)
+{
+	int total = 0;
+	for(int y=0; y<MAX_OCC; y++)
+		if(w.fo[y].filePath == NULL) 
+			break;
+		else
+			total += w.fo[y].total;
+			
+	return total;
+}
+
 void writeWords(struct word* listW, char* path)
 {
 
@@ -45,38 +57,48 @@ void writeWords(struct word* listW, char* path)
 	char* const oc = "OCCURRENCES ";
 	char* const DEFAULT_SEPARATOR = "\n";
 
-	printf(wd);
-	printf(to);
-	printf(fl);
-	printf(oc);
-	printf(DEFAULT_SEPARATOR);
-
-
-	char* str = "ciao";
-	/*
+	char* str;
 	char* name;
 	char* occ ;
 	
 	
 	for(int i=0; i<MAX_WORD; i++)
 	{
-		name=(char*)malloc(sizeof(wd)+sizeof(listW[i].name));
+		if(listW[i].name == 0) break;
+		/*name=(char*)malloc(sizeof(wd)+sizeof(listW[i].name));
 		name = wd;
-		strcat(name, listW[i].name);
+		strcat(name, listW[i].name);*/
+
+		printf("WORD %s\n", listW[i].name );
+
+		printf("TOTAL %d\n", countWordOccurrences(listW[i]));
 
 		for(int y=0; y<MAX_OCC; y++)
 		{
-		
+			if(listW[i].fo[y].filePath == NULL) break;
 
+			printf("FILE %s\n", listW[i].fo[y].filePath->path);
 
+			printf("OCCURRENCES %d\n", listW[i].fo[y].total);
 
+			for(int z=0; z<MAX_OCC; z++)
+			{
+				
+				if(listW[i].fo[y].x[z] == 0 && listW[i].fo[y].y[z] == 0) break;
+
+				printf("%d ",listW[i].fo[y].x[z]);
+
+				printf("%d\n",listW[i].fo[y].y[z]);
+			}
 		}
-	}*/
-
+		
+		/*
 	if(strlen(path) > 0)
 		writeToFile(path, str);
 	else
-		printf("%s\n", str);
+		printf("%s\n", str);*/
+	}
+	
 
 }
 
@@ -184,77 +206,75 @@ int EndsWith(const char *str, const char *suffix)
     return strncmp(str + lenstr - lensuffix, suffix, lensuffix) == 0;
 }
 
-void find(char* wordFilePath,char* inputFilePath,char* outputFilePath, char* extention, int verboseMode)
+struct fileOccurrences* scanFile(struct Input* input, char* name, char* extention, int verboseMode)
 {
-	struct word listW[MAX_WORD];
-	
-	listFiles(inputFilePath);
-	struct Input * input = &inputList;
-	
-	char* words = (char*)malloc(sizeof(readFile(wordFilePath))); 
-	FILE* f = fopen(wordFilePath, "r");
-	int i = 0;
-	int fileCount;
-	struct word* w;
-	struct fileOccurrences* foc;
-
-		while(fgets(words, sizeof(words), f))
-		{
-			fileCount = 0;
-			w = malloc(sizeof(struct  word));
-			foc = malloc(sizeof(struct fileOccurrences));
-			strtok(words, "\n");
-			if(verboseMode)
-				printf("Inizio elaborazione parola: %s\n", words);
-
-
-			while (input != NULL) {
-				if(!EndsWith(input->path, extention)) {
-
-				DIR* d = opendir(input->path);
-	
-				if (d == NULL) {
+	struct fileOccurrences* foc = (struct fileOccurrences*)malloc(MAX_OCC * sizeof(struct fileOccurrences));
+	int fileCount = 0;
+	while (input != NULL) {
+				if(!EndsWith(input->path, extention))
+					if (opendir(input->path) == NULL) {
 						if(verboseMode)
 							printf("Inizio elaborazione file: %s\n", input->path);
 
-						foc[fileCount].total = countWord(readFile(input->path), words, foc[fileCount].x, foc[fileCount].y);
+						foc[fileCount].total = countWord(readFile(input->path), name, foc[fileCount].x, foc[fileCount].y);
 						foc[fileCount].filePath = input;
-						
+						//printf("%d", foc[fileCount].total);
 						if(verboseMode)
 							printf("Fine elaborazione file: %s\n", input->path);
 
-				
+						fileCount++;
 					}
-				}
 				input = input->next;
 			}
+	return foc;
+}	
 
-			w->name = words;
+void copyWord(struct word* listW, char* name, struct fileOccurrences* foc)
+{
+	struct word* w = (struct word*)malloc(sizeof(struct word));
 
-			w->fo = malloc(sizeof(struct fileOccurrences));
+	w->name = (char*)malloc(strlen(name));
 
-			memcpy(w->fo, foc, sizeof(struct fileOccurrences));
+	strcpy(w->name, name);
 
-			addWordToList(listW, w);
+	w->fo = (struct fileOccurrences*)malloc(MAX_OCC * sizeof(struct fileOccurrences));
+
+	memcpy(w->fo, foc, MAX_OCC * sizeof(struct fileOccurrences));
+
+	addWordToList(listW, w);
+}	
+
+void find(char* wordFilePath,char* inputFilePath,char* outputFilePath, char* extention, int verboseMode)
+{
+	listFiles(inputFilePath);
+	struct Input * input = &inputList;
+	struct word listW[MAX_WORD];
+	char* words = (char*)malloc(sizeof(readFile(wordFilePath))); 
+	FILE* f = fopen(wordFilePath, "r");
+	int processedWord = 0;
+
+		while(fgets(words, sizeof(words), f))
+		{
+			strtok(words, "\n");
 			
-			free(w);
+			if(verboseMode)
+				printf("Inizio elaborazione parola: %s\n", words);;
 
-			free(foc);
-
+			copyWord(listW, words, scanFile(input, words, extention, verboseMode));
+			
 			if(verboseMode)
 				printf("Fine elaborazione parola: %s\n", words);
 
 			input = &inputList;
 
-			i++;
+			processedWord++;
 		}
 	fclose(f);
 
-	qsort(listW, i, sizeof(struct word), CompareWord); 
+	qsort(listW, processedWord, sizeof(struct word), CompareWord); 
 
 	if(verboseMode)
 		printf("Tutte le elaborazioni sono terminate.\n");
 	
 	writeWords(listW, outputFilePath);
-	
 }

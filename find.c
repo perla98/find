@@ -31,7 +31,7 @@ char* readFile(char* filename)
 
 void writeToFile(const char* filename, char* string)
 {
-	FILE* f = fopen(filename, "a");
+	FILE* f = fopen(filename, "w");
 	fprintf(f, "%s", string);
 	fclose(f);
 }
@@ -258,7 +258,7 @@ void find(char* wordFilePath,char* inputFilePath,char* outputFilePath, char* ext
 			strtok(words, "\n");
 			
 			if(verboseMode)
-				printf("Inizio elaborazione parola: %s\n", words);;
+				printf("Inizio elaborazione parola: %s\n", words);
 
 			copyWord(listW, words, scanFile(input, words, extention, verboseMode));
 			

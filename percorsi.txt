@@ -1,2 +1,1 @@
-5maggio.txt
-marzo1821.txt
+/home/user/find/5maggio.txt

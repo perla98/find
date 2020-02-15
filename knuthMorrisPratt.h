@@ -1,4 +1,4 @@
-#ifndef __KNUTHMORRISEPRATT_H
+#ifndef __KNUTHMORRISPRATT_H
 #define __KNUTHMORRISPRATT_H
 #include <stdio.h>
 #define _POSIX_C_SOURCE 200809L

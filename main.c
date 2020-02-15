@@ -22,9 +22,9 @@ int main(int argc, char** argv)
 	};
 
     int verboseMode = 0;
-	char* word;
-    char* path;
-	char* output = "";
+	char* word = "";
+    char* path = "";
+    char* output = "";
     char* extension = "...";
 	char* show;
 	char* showFile;
@@ -53,7 +53,7 @@ int main(int argc, char** argv)
         }
     }
 	
-	if(word !=NULL && word != 0 && path != 0 && path !=NULL){
+	if(strlen(word) > 0 && strlen(path) > 0){
 		find(word, path, output, extension, verboseMode);
 	}
 	else if(output != 0 && show != 0){

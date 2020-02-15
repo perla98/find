@@ -36,7 +36,7 @@ void report(char* output, char* show, char* showfile){
 	}
 	//fclose(f);
 	if(showfile != 0)
-		writeToFile(showfile, str);
+		printf(str);//writeToFile(showfile, str);
 	else
 		printf(str);
 }

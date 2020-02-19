@@ -102,8 +102,6 @@ void writeWords(struct word* listW, char* path)
 
 struct Input* addInputToList(struct Input* a, struct Input* in)
 {
-
-
   if (a == NULL)
   {
 
@@ -135,37 +133,40 @@ struct Input* addInputToList(struct Input* a, struct Input* in)
   return a;
 }
 
+void insertPath(struct dirent* entry, struct Input* inputList, struct Input* dir, struct Input* temp)
+{
+	char path[1024];
+	char* const pathFormat = "%s/%s";
+	snprintf(path, sizeof(path), pathFormat, temp->path, entry->d_name);
+	dir->path = path;
+	dir->rec = 0;
+	inputList = addInputToList(inputList, dir);
+}
+
 struct Input* fillFiles(struct Input* inputList)
 {
-	char* const pathFormat = "%s/%s";
-
 	struct Input* temp = inputList;
 
 	while (1)
 	{
 		struct Input* dir = (struct Input*)malloc(sizeof(struct Input));
 
-		
-			DIR* d = opendir(temp->path);
-			struct dirent* entry;
-			if (d)
-    		{
+		DIR* d = opendir(temp->path);
+		struct dirent* entry;
+		if (d)
+    	{
         	while ((entry = readdir(d)) != NULL)
-        	{	
-				char path[1024];
-            
-            if(entry->d_type==DT_REG){
-                if (strcmp(entry->d_name, ".") == 0  || 
-						strcmp(entry->d_name, "..") == 0)
-						continue;
-					snprintf(path, sizeof(path), pathFormat, temp->path, entry->d_name);
-					dir->path = path;
-					dir->rec = 0;
-					inputList = addInputToList(inputList, dir);
+        	{	            
+            	if(entry->d_type==8)//DT_REG
+				{
+                	if (strcmp(entry->d_name, ".") == 0  || 
+							strcmp(entry->d_name, "..") == 0)
+							continue;
+					insertPath(entry, inputList, dir, temp);
             	}
         	}
-        closedir(d);
-    }
+       		closedir(d);
+    	}	
 		
 		if(temp->next != NULL)
 			temp = temp->next;
@@ -174,14 +175,11 @@ struct Input* fillFiles(struct Input* inputList)
 	} 
 
 	return inputList;
-
 }
 
 
 struct Input* fillRecursiveDirectory(struct Input* inputList)
 {
-	char* const pathFormat = "%s/%s";
-
 	struct Input* temp = inputList;
 
 	while (1)
@@ -193,18 +191,17 @@ struct Input* fillRecursiveDirectory(struct Input* inputList)
 			DIR* d = opendir(temp->path);
 			struct dirent* entry;
 			while ((entry = readdir(d)) != NULL) {
-				if (entry->d_type==DT_DIR) {
-					char path[1024];
+				if (entry->d_type==4) //DT_DIR 
+				{
 					if (strcmp(entry->d_name, ".") == 0  || 
 						strcmp(entry->d_name, "..") == 0)
 						continue;
-					snprintf(path, sizeof(path), pathFormat, temp->path, entry->d_name);
-					dir->path = path;
-					dir->rec = 0;
-					inputList = addInputToList(inputList, dir);
+					insertPath(entry, inputList, dir, temp);
 				}
 			}
+			closedir(d);
 		}
+		
 		if(temp->next != NULL)
 			temp = temp->next;
 		else

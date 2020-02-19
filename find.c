@@ -1,8 +1,6 @@
 ﻿
 #include "find.h"
 
-Input inputList;
-
 char* readFile(char* filename)
 {
 	char* buffer = NULL;
@@ -102,65 +100,128 @@ void writeWords(struct word* listW, char* path)
 	free(str);
 }
 
-void addInputToList(struct Input* dir)
+struct Input* addInputToList(struct Input* a, struct Input* in)
 {
-	dir->next = NULL;
 
-	if (inputList.path != NULL) {
-		Input* temp = &inputList;
 
-		while (temp->next != NULL)
-			temp = temp->next;
-		temp->next = malloc(sizeof(struct Input));
-		temp->next = dir;
-	}
-	else {
-		inputList = *dir;
-	}
+  if (a == NULL)
+  {
+
+    a = (struct Input*)malloc(sizeof(struct Input));
+	a->rec = in->rec;
+	a->path = (char*)malloc(sizeof(char)*1024);
+    strcpy(a->path, in->path);
+    a->next = NULL;
+  }
+  else
+  {
+    struct Input* iter,* temp;
+
+    iter = a;
+
+    while (iter->next != NULL)
+    {
+      iter = iter->next;
+    }
+
+    temp = (struct Input*)malloc(sizeof(struct Input));
+	temp->rec = in->rec;
+	temp->path = (char*)malloc(sizeof(char)*1024);
+    strcpy(temp->path, in->path);
+    temp->next = NULL;
+
+    iter->next = temp;
+  }  
+  return a;
 }
 
-void fillRecursiveDirectory()
+struct Input* fillFiles(struct Input* inputList)
 {
 	char* const pathFormat = "%s/%s";
 
-	Input temp = inputList;
+	struct Input* temp = inputList;
 
 	while (1)
 	{
-		Input dir;
+		struct Input* dir = (struct Input*)malloc(sizeof(struct Input));
 
-		if (temp.rec == 1)
-		{
-			DIR* d = opendir(temp.path);
+		
+			DIR* d = opendir(temp->path);
 			struct dirent* entry;
-			while ((entry = readdir(d)) != NULL) {
-				if (entry !=NULL) {
-					char path[1024];
-					if (strcmp(entry->d_name, ".") == 0  || 
+			if (d)
+    		{
+        	while ((entry = readdir(d)) != NULL)
+        	{	
+				char path[1024];
+            
+            if(entry->d_type==DT_REG){
+                if (strcmp(entry->d_name, ".") == 0  || 
 						strcmp(entry->d_name, "..") == 0)
 						continue;
-					snprintf(path, sizeof(path), pathFormat, temp.path, entry->d_name);
-					dir.path = path;
-					dir.rec = 0;
-					addInputToList(&dir);
-				}
-			}
-		}
-		if(temp.next != NULL)
-			temp = *temp.next;
+					snprintf(path, sizeof(path), pathFormat, temp->path, entry->d_name);
+					dir->path = path;
+					dir->rec = 0;
+					inputList = addInputToList(inputList, dir);
+            	}
+        	}
+        closedir(d);
+    }
+		
+		if(temp->next != NULL)
+			temp = temp->next;
 		else
 			break;
 	} 
 
+	return inputList;
+
 }
 
-void listFiles(char* filePath)
+
+struct Input* fillRecursiveDirectory(struct Input* inputList)
 {
+	char* const pathFormat = "%s/%s";
+
+	struct Input* temp = inputList;
+
+	while (1)
+	{
+		struct Input* dir = (struct Input*)malloc(sizeof(struct Input));
+
+		if (temp->rec == 1)
+		{
+			DIR* d = opendir(temp->path);
+			struct dirent* entry;
+			while ((entry = readdir(d)) != NULL) {
+				if (entry->d_type==DT_DIR) {
+					char path[1024];
+					if (strcmp(entry->d_name, ".") == 0  || 
+						strcmp(entry->d_name, "..") == 0)
+						continue;
+					snprintf(path, sizeof(path), pathFormat, temp->path, entry->d_name);
+					dir->path = path;
+					dir->rec = 0;
+					inputList = addInputToList(inputList, dir);
+				}
+			}
+		}
+		if(temp->next != NULL)
+			temp = temp->next;
+		else
+			break;
+	} 
+
+	return inputList;
+}
+
+struct Input* listFiles(char* filePath)
+{
+	struct Input* inputList;
 	char* temp = malloc(sizeof(char) * 1024);
 	temp[0] = 0;
 	FILE* f = fopen(filePath, "r");
 
-	struct Input* dir = malloc(sizeof(struct Input));
+	struct Input* dir = (struct Input*)malloc(sizeof(struct Input));
 
 	while(fgets(temp, 1024, f) != NULL) {
 		temp = strtok(temp, "\n");
@@ -173,10 +234,14 @@ void listFiles(char* filePath)
 			dir->rec = 0 ;
 		dir->path = (char*)malloc(1024);
 		strcpy(dir->path, temp);
-		addInputToList(dir);
+		inputList = addInputToList(inputList, dir);
 	}
 
-	fillRecursiveDirectory();
+	inputList = fillRecursiveDirectory(inputList);
+
+	inputList = fillFiles(inputList);
+
+	return inputList;
 }
 
 void addWordToList(struct word* listW, struct word* w)
@@ -246,8 +311,8 @@ void copyWord(struct word* listW, char* name, struct fileOccurrences* foc)
 
 void find(char* wordFilePath,char* inputFilePath,char* outputFilePath, char* extention, int verboseMode)
 {
-	listFiles(inputFilePath);
-	struct Input * input = &inputList;
+	struct Input* inputList = listFiles(inputFilePath);
+	struct Input * input = inputList;
 	struct word listW[MAX_WORD];
 	char* words = (char*)malloc(sizeof(readFile(wordFilePath))); 
 	FILE* f = fopen(wordFilePath, "r");
@@ -265,7 +330,7 @@ void find(char* wordFilePath,char* inputFilePath,char* outputFilePath, char* ext
 			if(verboseMode)
 				printf("Fine elaborazione parola: %s\n", words);
 
-			input = &inputList;
+			input = inputList;
 
 			processedWord++;
 		}

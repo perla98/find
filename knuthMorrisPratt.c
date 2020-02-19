@@ -6,7 +6,7 @@ int countWord(char* s, char* word, int* X, int* Y) {
 	
 	char first = word[0];
 	size_t i, j, count = 0;
-	int f,row = 0;
+	int f = 0,row = 0;
 	if (first == '\0')
 		return 0;
 

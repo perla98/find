@@ -24,11 +24,11 @@ struct word {
 	struct fileOccurrences* fo;
 };
 
-typedef struct Input {
+struct Input {
 	char* path;
 	int rec;
 	struct Input* next;
-} Input;
+};
 
 
 void find(char* wordFilePath,char* inputFilePath,char* outputFilePath, char* extention, int verboseMode);

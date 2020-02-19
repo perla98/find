@@ -1,2 +1,1 @@
-/home/user/find/5maggio.txt
-/home/user/find/marzo1821.txt
+/home/user/find/cerca r

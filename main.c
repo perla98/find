@@ -1,6 +1,4 @@
 #include <stdio.h>
-//#include <stdlib.h>
-//#include <string.h>
 #include <getopt.h>
 #include "report.h"
 #include "find.h"
@@ -9,7 +7,7 @@
 int main(int argc, char** argv)
 {	
 	struct option long_options[] = {
-	{"word", required_argument, 0, 'w'},
+	{"words", required_argument, 0, 'w'},
 	{"input", required_argument, 0, 'i'},
 	{"output", required_argument, 0, 'o'},
     {"exclude", required_argument, 0, 'e'},
@@ -27,7 +25,7 @@ int main(int argc, char** argv)
     char* output = "";
     char* extension = "...";
 	char* show;
-	char* showFile;
+	char* showFile = "";
     int opt;
     int option_index = 0;
     const char * short_options = "w:i:o:e:v:r:s:f:x";

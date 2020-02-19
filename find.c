@@ -48,58 +48,58 @@ int countWordOccurrences(struct word w)
 	return total;
 }
 
+void concatChar(char* target,const char* scr,const char* nextChar)
+{
+	strcat(target, scr);
+	strcat(target, nextChar);
+}	
+
+void concatInt(char* target,const int scr,const char* nextChar)
+{
+	char* temp = (char*)malloc(sizeof(char)*sizeof(int)*2);
+	sprintf(temp, "%d", scr);
+	concatChar(target, temp, nextChar);
+	free(temp);
+}
+
 void writeWords(struct word* listW, char* path)
 {
-
-	char* const wd = "WORD ";
-	char* const to = "TOTAL "; 
-	char* const fl = "FILE ";
-	char* const oc = "OCCURRENCES ";
 	char* const DEFAULT_SEPARATOR = "\n";
+	char* str = (char*)malloc(sizeof(char)*(sizeof(struct word)*MAX_WORD + sizeof(struct fileOccurrences)*MAX_OCC));
 
-	char* str;
-	char* name;
-	char* occ ;
-	
-	
 	for(int i=0; i<MAX_WORD; i++)
 	{
 		if(listW[i].name == 0) break;
-		/*name=(char*)malloc(sizeof(wd)+sizeof(listW[i].name));
-		name = wd;
-		strcat(name, listW[i].name);*/
 
-		printf("WORD %s\n", listW[i].name );
-
-		printf("TOTAL %d\n", countWordOccurrences(listW[i]));
+		strcat(str, "WORD ");
+		concatChar(str, listW[i].name, DEFAULT_SEPARATOR);
+		strcat(str, "TOTAL ");
+		concatInt(str, countWordOccurrences(listW[i]), DEFAULT_SEPARATOR);
 
 		for(int y=0; y<MAX_OCC; y++)
 		{
 			if(listW[i].fo[y].filePath == NULL) break;
-
-			printf("FILE %s\n", listW[i].fo[y].filePath->path);
-
-			printf("OCCURRENCES %d\n", listW[i].fo[y].total);
-
+			strcat(str, "FILE ");
+			concatChar(str, listW[i].fo[y].filePath->path, DEFAULT_SEPARATOR);
+			strcat(str, "OCCURRENCES ");
+			concatInt(str, listW[i].fo[y].total, DEFAULT_SEPARATOR);
+			
 			for(int z=0; z<MAX_OCC; z++)
 			{
-				
 				if(listW[i].fo[y].x[z] == 0 && listW[i].fo[y].y[z] == 0) break;
-
-				printf("%d ",listW[i].fo[y].x[z]);
-
-				printf("%d\n",listW[i].fo[y].y[z]);
+				
+				concatInt(str, listW[i].fo[y].x[z], " ");
+				concatInt(str, listW[i].fo[y].y[z], DEFAULT_SEPARATOR);
 			}
-		}
-		
-		/*
+		}    
+	}
+
 	if(strlen(path) > 0)
 		writeToFile(path, str);
 	else
-		printf("%s\n", str);*/
-	}
-	
+		printf("%s\n", str);
 
+	free(str);
 }
 
 void addInputToList(struct Input* dir)
@@ -199,7 +199,7 @@ int EndsWith(const char *str, const char *suffix)
 {
     if (!str || !suffix)
         return 0;
-    size_t lenstr = strlen(str); //abbiamo visto questo consiglio su internet di mettere size_t
+    size_t lenstr = strlen(str);
     size_t lensuffix = strlen(suffix);
     if (lensuffix >  lenstr)
         return 0;
@@ -218,7 +218,7 @@ struct fileOccurrences* scanFile(struct Input* input, char* name, char* extentio
 
 						foc[fileCount].total = countWord(readFile(input->path), name, foc[fileCount].x, foc[fileCount].y);
 						foc[fileCount].filePath = input;
-						//printf("%d", foc[fileCount].total);
+						
 						if(verboseMode)
 							printf("Fine elaborazione file: %s\n", input->path);
 

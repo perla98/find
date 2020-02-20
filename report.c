@@ -18,7 +18,7 @@ void report(char* output, char* show, char* showfile){
     char* const wd = "WORD ";
 	char* const fl = "FILE ";
 
-	char* words = (char*)malloc(1024);
+	char* words = (char*)malloc(sizeof(char)*1024);
 
 	FILE* f = fopen(output, "r");
 	char* searchStr = (char*)malloc(sizeof(words));

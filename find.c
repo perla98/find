@@ -104,7 +104,6 @@ struct Input* addInputToList(struct Input* a, struct Input* in)
 {
   if (a == NULL)
   {
-
     a = (struct Input*)malloc(sizeof(struct Input));
 	a->rec = in->rec;
 	a->path = (char*)malloc(sizeof(char)*1024);
@@ -167,6 +166,8 @@ struct Input* fillFiles(struct Input* inputList)
         	}
        		closedir(d);
     	}	
+
+		free(dir);
 		
 		if(temp->next != NULL)
 			temp = temp->next;
@@ -201,6 +202,8 @@ struct Input* fillRecursiveDirectory(struct Input* inputList)
 			}
 			closedir(d);
 		}
+
+		free(dir);
 		
 		if(temp->next != NULL)
 			temp = temp->next;
@@ -213,7 +216,7 @@ struct Input* fillRecursiveDirectory(struct Input* inputList)
 
 struct Input* listFiles(char* filePath)
 {
-	struct Input* inputList;
+	struct Input* inputList = NULL;
 	char* temp = malloc(sizeof(char) * 1024);
 	temp[0] = 0;
 	FILE* f = fopen(filePath, "r");
@@ -229,10 +232,13 @@ struct Input* listFiles(char* filePath)
 		}
 		else 
 			dir->rec = 0 ;
-		dir->path = (char*)malloc(1024);
+		dir->path = (char*)malloc(sizeof(char)*1024);
 		strcpy(dir->path, temp);
 		inputList = addInputToList(inputList, dir);
 	}
+
+	free(dir);
+	free(temp);
 
 	inputList = fillRecursiveDirectory(inputList);
 
@@ -295,7 +301,7 @@ void copyWord(struct word* listW, char* name, struct fileOccurrences* foc)
 {
 	struct word* w = (struct word*)malloc(sizeof(struct word));
 
-	w->name = (char*)malloc(strlen(name));
+	w->name = (char*)malloc(sizeof(char)*strlen(name));
 
 	strcpy(w->name, name);
 
@@ -304,6 +310,8 @@ void copyWord(struct word* listW, char* name, struct fileOccurrences* foc)
 	memcpy(w->fo, foc, MAX_OCC * sizeof(struct fileOccurrences));
 
 	addWordToList(listW, w);
+
+	free(w);
 }	
 
 void find(char* wordFilePath,char* inputFilePath,char* outputFilePath, char* extention, int verboseMode)
@@ -331,6 +339,9 @@ void find(char* wordFilePath,char* inputFilePath,char* outputFilePath, char* ext
 
 			processedWord++;
 		}
+
+	free(words);
+	
 	fclose(f);
 
 	qsort(listW, processedWord, sizeof(struct word), CompareWord); 

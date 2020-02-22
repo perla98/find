@@ -1,1 +1,1 @@
-/home/user/find/EXAMPLE_FIND
+./EXAMPLE_FIND
